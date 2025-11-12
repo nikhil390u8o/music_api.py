@@ -1,0 +1,5 @@
+ffmpeg
+yt-dlp
+flask
+request
+jsonify
