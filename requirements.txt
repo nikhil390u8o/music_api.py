@@ -1,5 +1,4 @@
-ffmpeg
-yt-dlp
 flask
-request
-jsonify
+yt-dlp
+requests
+ffmpeg
