@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
-from flask_cors 
+from flask_cors import CORS
 import yt_dlp
 import os
 
 app = Flask(__name__)
-CORS(app)  # Allow frontend to access API
+CORS(app)  # Allow frontend to fetch API
 
 @app.route('/song')
 def song():
@@ -13,15 +13,28 @@ def song():
         return jsonify({'error': 'Missing ?q='}), 400
 
     try:
-        ydl_opts = {'format': 'bestaudio/best'}
+        ydl_opts = {'format': 'bestaudio/best', 'noplaylist': True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(f"ytsearch:{q}", download=False)['entries'][0]
+            search = ydl.extract_info(f"ytsearch5:{q}", download=False)
+            entries = search.get('entries', [])
+
+            # Find the first playable public video
+            info = None
+            for e in entries:
+                if e.get('url') and not e.get('age_limit', 0):
+                    info = e
+                    break
+
+            if not info:
+                return jsonify({'error': 'No playable public video found'}), 404
+
             return jsonify({
                 'title': info['title'],
                 'url': info['url'],
                 'thumbnail': info['thumbnail'],
                 'webpage_url': info['webpage_url']
             })
+
     except Exception as e:
         return jsonify({'error': 'Failed to fetch song', 'details': str(e)}), 500
 
